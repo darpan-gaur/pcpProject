@@ -14,7 +14,7 @@ using namespace std::chrono;
 
 // global variables
 int nx, ny, num_diagonals;
-const int num_threads = 16;
+int num_threads;
 double *x, *dx, *y, *dy;
 double **aP, **aE, **aW, **aN, **aS, **b, **Sp;
 double **T, **Tex, **kdiff, **Tpad, **Tpnew;
@@ -571,11 +571,11 @@ int main()
     FILE *fp;
 
     // read inputs
-    fp = fopen("input.in", "r");
+    fp = fopen("input_par.in", "r");
     fscanf(fp, "%d %d\n", &nx, &ny);
     fscanf(fp, "%lf %lf\n", &xst, &xen);
     fscanf(fp, "%lf %lf\n", &yst, &yen);
-    // fscanf(fp, "%d\n", &num_threads);
+    fscanf(fp, "%d\n", &num_threads);
     fclose(fp);
 
     printf("Inputs are: %d %d %lf %lf %lf %lf %d\n", nx, ny, xst, xen, yst, yen, num_threads);

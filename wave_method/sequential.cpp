@@ -370,7 +370,7 @@ int main()
     FILE *fp;
 
     // read inputs
-    fp = fopen("input.in", "r");
+    fp = fopen("input_seq.in", "r");
     fscanf(fp, "%d %d\n", &nx, &ny);
     fscanf(fp, "%lf %lf\n", &xst, &xen);
     fscanf(fp, "%lf %lf\n", &yst, &yen);
