@@ -1,0 +1,65 @@
+// Sequential pseudocode for gauss siedel
+// T -> (nx+2, ny+2) matrix
+// aW, aS, aP, aN, aE, b -> each of size (nx, ny)
+
+aW, aS, aP, aN, aE, b = get_coefficients(nx, ny, xst, xen, yst, yen);
+
+function sequentialGS() {
+    for iter in [1, max_iter] {
+        err = 0.0;
+        for i in [0, nx) {
+            for j in [0, ny) {
+                ip = i + 1, jp = j+1;
+
+                T_prev = T[ip][jp];
+
+                T[ip][jp] = ( b[i][j] + aE[i][j]*Tpnew[ip+1][jp] + aW[i][j]*Tpnew[ip-1][jp] + 
+                          aN[i][j]*Tpnew[ip][jp+1] + aS[i][j]*Tpnew[ip][jp-1] ) / aP[i][j];
+                
+                err += (T[ip][j] - T_prev)^2;
+            }
+        }
+        
+        if (err < threshold) break;
+    }
+}
+
+//=============================================================
+// Parallel pseudocode
+
+// err is a global variable
+// thread_err[num_threads] is a global array
+
+function updateVals() {
+    temp_err = 0.0; // Thread local variable
+    for iter in [1, max_iter] {
+        // Update T and calculate temp_err
+
+        thread_err[threadId.get()] = temp_err;
+
+        Barrier_1.wait();
+        // Now calculate error thread will run
+
+        Barrier_2.wait();
+
+        if (err < threshold) break;
+    }
+}
+
+function calcError() {
+    for iter in [1, max_iter] {
+        Barrier_1.wait();
+
+        // Calculate error and update the variable err
+
+        Barrier_2.wait();
+
+        if (err < threshold) break;
+    }
+}
+
+function parallelGS(n) {
+    // Create n updateVals threads
+
+    // Create 1 calcError thread
+}
