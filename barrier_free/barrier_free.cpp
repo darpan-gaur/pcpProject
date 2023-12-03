@@ -407,7 +407,7 @@ void *calculate_new_values(void* thread_id) {
     int *thrIdPtr = (int *)thread_id;
     int thrId = *thrIdPtr;
 
-    int iter, ip , jp, i, j, get_count_iter;
+    int iter, ip , jp, i, j, get_count_value;
     double T_gs, T_prev, thr_err, diff, tpad_max, tpnew_max, l2err, arrmax1, arrmax2, err_ref;
     for (iter = 0; iter < max_iter; iter++) {
         if (done_calculation) break;
@@ -451,9 +451,9 @@ void *calculate_new_values(void* thread_id) {
         thread_tpad_max[iter][thrId-1] = tpad_max;
         thread_tpnew_max[iter][thrId-1] = tpnew_max;
 
-        get_count_iter = count_arr[iter].fetch_add(1);
+        get_count_value = count_arr[iter].fetch_add(1);
 
-        if (get_count_iter == num_threads - 1) {
+        if (get_count_value == num_threads - 1) {
             // All threads have finished calculating new values for iteration iter
             // Calculate error
             l2err = get_sum_1d_array(num_threads, thread_errs[iter]);
