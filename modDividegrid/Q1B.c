@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-const double PI = 4.0*atan(1.0);
+// const double PI = 4.0*atan(1.0);
 
 void grid(int nx, double xst, double xen, double *x, double *dx)
 {

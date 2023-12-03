@@ -1,0 +1,82 @@
+This folder contains two sub-folders:
+
+//********************************************************************************************//
+serial_code/ contains a c code that solves the 2-dimensional strady diffusion equation:
+
+ddx ( k * ddx (T) ) + ddy ( k * ddy (T) ) + qdot = 0
+
+where: 
+  qdot is the (known) source term; 
+  k is the known diffusivity 
+  T is the (unknown) temperature field
+
+This equation is to be solved on a domain of size Lx * Ly
+The domain boundaries are x = 0 (left), x = Lx (right), y = 0 (bottom) and y = Ly (top).
+This equation is accompanied by either Dirichlet (fixed value) or Neumann (fixed gradient) conditions on each boundary. 
+
+
+In this example, the inputs are as follows:
+
+  Lx = 1; Ly = 0.5;
+  qdot = (2 + pi^2 * x * (1-x)) * cos(pi * y)
+  k = 1
+
+  Boundary conditions:
+    left  : T = 0       (Dirichlet)
+    right : T = 0       (Dirichlet)
+    top   : T = 0       (Dirichlet)
+    bottom: dTdy = 0    (Neumann)
+
+The above inputs are consistent with the following exact solution, as may be verified by direct substitution into the governing equation:
+
+    T_exact = x * (1-x) * cos(pi * y)
+
+
+The code solves the above equation by discretizing the domain into nx * ny control volumes (CVs) using a standard 'Finite-Volume Method', or FVM. Each CV is associated with one unknown value of T. A linear algebraic system of equations is constructed for the nx*ny T values. 
+
+A_matrix * T_vector = rhs_vector
+
+
+Each linear equation (one row of the above system) is of the form:
+
+aP*TP = aE*TE + aW*TW + aN*TN + aS*TS + b
+
+where: 
+  TP, TE, TW, TN, TS, refer to temperature values at the 'present' CV and east/west/north/south neighbouring CVs respectively. 
+  aP, aE, aW, aN, aS are the corresponding coefficients. 
+  b is the right-hand-side vector.
+
+The coefficients aP, aE, aW, aN, aS make up the coefficient matrix (A_matrix); 
+TP, TE, TW, TN, TS make up the vector of unknowns, T_vector; 
+b makes up the right-hand-side vector (rhs_vector). 
+
+
+Since there are only at max 5 entires that can be non-zero in any row, the coefficient matrix is a pentadiagonal matrix. This system of equations is solved using the Gauss-Seidel SOR (Successive Over Relaxation) method.
+
+
+USAGE   (On a linux system with 'gcc', and 'make') :: 
+
+  -- Type 'make' to compile. 
+  -- Adjust inputs in 'input.in'. Leave the last two lines unchaged; only change the no. of CVs in x and y directions
+  -- Run the code by typing './execfile'
+
+//********************************************************************************************//
+postproc/ contains two Matlab files that can be used to read the outputs of the c code and generate contour plots.
+Plots are generated for the exact solution as well as the numerical solution.
+
+USAGE :: 
+
+  -- Adjust 'nxarr' and 'nyarr' in 'plot_contours.m'
+  -- run 'plot_contours.m' from the Matlab command prompt
+  -- Note that the 'screen2jpeg.m' function works only in a linux environment. On windows, it will not export the figure as a png file.
+
+//********************************************************************************************//
+Notes on parallelization:
+
+  -- The serial code stores all elements of the grid, i.e. nx*ny points, on the same (the only) processor. 
+  -- The parallel code will make use of domain decomposition, i.e. only a part of the grid will be stored on each processor.
+  -- For example, if the processor topology is such that the processors are divided into pr * pc (rows * columns), each processor will hold (nx/pr) * (ny/pc) points.
+  -- With the domain decomposed in this manner, every processor needs to calculate coefficients for its portion of the grid and all processors need to collectively implement the GS-SOR algorithm for solving the linear system. 
+  -- The major task in parallelizing this code is to perform 'halo exchanges' at the processor boundaries. These halo exchanges will be needed in the 'get_fv_coeffs' as well as 'solve_gssor' portions of the serial code.
+  -- Several global reduction operations will also be needed, e.g., to calculate the l2-norm of the error, or to calculate the maximum over an array. 
+  -- l2 error norms can be compared between the serial and the parallel codes to ensure correctness of the parallel code
