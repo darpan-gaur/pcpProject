@@ -63,3 +63,32 @@ function parallelGS(n) {
 
     // Create 1 calcError thread
 }
+
+//=============================================================
+// Barrier free pseudocode
+
+// count_arr[max_iter] and thread_err[max_iter][num_threads] are global arrays
+// done_calculation is a gloabl boolean variable
+
+void barrierFreeUpdateVals() {
+    for (iter = 0; iter < max_iter; iter++) {
+        if (done_calculation) break;
+
+        // Update T and calculate temp_err
+        // Keep checking the value of done_calculation
+
+        if (done_calculation) break;
+        thread_err[iter][ThreadId.get()] = temp_err;
+
+        get_count_value = count_arr[iter].fetchAndAdd(1);
+
+        if (get_count_value == num_threads - 1) {
+            // Calculate error 
+
+            if (err < threshold) {
+                done_calculation = true;
+                break;
+            }
+        }
+    }
+}
