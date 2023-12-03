@@ -407,7 +407,7 @@ void *calculate_new_values(void* thread_id) {
     int *thrIdPtr = (int *)thread_id;
     int thrId = *thrIdPtr;
 
-    int iter, ip , jp, i, j, batch_iter_count = 0;
+    int iter, ip , jp, i, j, get_count_iter;
     double T_gs, T_prev, thr_err, diff, tpad_max, tpnew_max, l2err, arrmax1, arrmax2, err_ref;
     for (iter = 0; iter < max_iter; iter++) {
         if (done_calculation) break;
@@ -451,9 +451,9 @@ void *calculate_new_values(void* thread_id) {
         thread_tpad_max[iter][thrId-1] = tpad_max;
         thread_tpnew_max[iter][thrId-1] = tpnew_max;
 
-        count_arr[iter].fetch_add(1);
+        get_count_iter = count_arr[iter].fetch_add(1);
 
-        if (count_arr[iter] == num_threads) {
+        if (get_count_iter == num_threads - 1) {
             // All threads have finished calculating new values for iteration iter
             // Calculate error
             l2err = get_sum_1d_array(num_threads, thread_errs[iter]);
@@ -600,7 +600,7 @@ int main()
     printf("Inputs are: %d %d %lf %lf %lf %lf %d\n", nx, ny, xst, xen, yst, yen, num_threads);
 
     max_iter = 100000;
-    tol = 1.0e-10;
+    tol = 1.0e-12;
     relax_T = 1.0;
 
     // pthread_barrier_init(&bar_calc_1, NULL, num_threads);
