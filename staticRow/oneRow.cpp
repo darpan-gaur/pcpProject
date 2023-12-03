@@ -694,6 +694,9 @@ int main()
     get_exact_soln(nx, ny, xc, yc, Tex);
     output_soln(nx, ny, 0, xc, yc, T, Tex);
 
+    double l2err = get_l2err_norm(nx, ny, T, Tex);
+    printf("%d %d %9.5e\n", nx, ny, l2err);
+
     // free memory
     // ----1D arrays ---
     free(yc); free(yf);
