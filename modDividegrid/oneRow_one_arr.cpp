@@ -344,7 +344,7 @@ void *calculate_new_values(void* thread_id) {
             
         //     diagonal_number += num_threads;
         // }
-        for (i=thrId;i<nx;i+=num_threads){
+        for (i=thrId-1;i<nx;i+=num_threads){
             for (j=0;j<ny;j++) {
                 ip = i+1;
                 jp = j+1;
