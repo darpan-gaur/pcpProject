@@ -577,7 +577,7 @@ void output_soln(int nx, int ny, int iter, double *x, double *y, double **T, dou
             fprintf(fp, "%lf %lf %lf %lf\n", x[i], y[j], T[i][j], Tex[i][j]);
     fclose(fp);
 
-    printf("Done writing solution for stamp = %d to file %s\n", iter, fname);
+    // printf("Done writing solution for stamp = %d to file %s\n", iter, fname);
 }
 
 int main()
@@ -593,7 +593,7 @@ int main()
     fscanf(fp, "%d\n", &num_threads);
     fclose(fp);
 
-    printf("Inputs are: %d %d %lf %lf %lf %lf %d\n", nx, ny, xst, xen, yst, yen, num_threads);
+    // printf("Inputs are: %d %d %lf %lf %lf %lf %d\n", nx, ny, xst, xen, yst, yen, num_threads);
 
     max_iter = 100000;
     tol = 1.0e-10;
@@ -604,7 +604,7 @@ int main()
     // pthread_barrier_init(&bar_upd, NULL, num_threads+1);
 
     // allocate memory
-    printf("\n > Allocating Memory -- \n");
+    // printf("\n > Allocating Memory -- \n");
     xc = (double *)malloc(nx * sizeof(double));        // grid points
     xf = (double *)malloc((nx+1) * sizeof(double));        // grid points
     dxc = (double *)malloc((nx + 1) * sizeof(double)); // spacing betw grid points
@@ -615,7 +615,7 @@ int main()
     dyc = (double *)malloc((ny + 1) * sizeof(double)); // spacing betw grid points
     dyf = (double *)malloc(ny * sizeof(double)); // spacing betw grid points
 
-    printf("   >> Done allocating 1D arrays -- \n");
+    // printf("   >> Done allocating 1D arrays -- \n");
 
     // allocate 2D arrays dynamically
     // -- for T --
@@ -709,34 +709,39 @@ int main()
         thread_tpnew_max[i] = (double *)malloc(num_threads * sizeof(double));
     }
 
-    printf(" > Done allocating memory -------- \n");
+    // printf(" > Done allocating memory -------- \n");
 
     // initialize the grid
     grid(nx, xst, xen, xc, xf, dxc, dxf);  // -- along x --
     grid(ny, yst, yen, yc, yf, dyc, dyf);  // -- along y --
-    printf("\n > Done setting up grid ---------- \n");
+    // printf("\n > Done setting up grid ---------- \n");
 
     set_initial_guess(nx,ny,xc,yc,T);  // initial condition
-    printf("\n > Done setting up initial guess -- \n");
+    // printf("\n > Done setting up initial guess -- \n");
 
     // ---
     get_fv_coeffs(nx, ny, xc, yc, xf, yf, dxc, dxf, dyc, dyf,     // grid vars
                 aP, aE, aW, aN, aS, b, Sp, kdiff, T,            // coefficients
                 Tleft, Tright, qbot, Ttop);                    // BC vars
-    printf("\n > Done calculating fv coeffs ----- \n");
+    // printf("\n > Done calculating fv coeffs ----- \n");
 
-    printf("\n > Solving for T ------------- \n");
+    // printf("\n > Solving for T ------------- \n");
     long long timeTaken = solve_gssor_wave();
 
     // ---
     // printf(" > Done solving for T ------------- \n");
 
-    printf("\nNumber of iterations: %d\n", num_iters_taken);
-    printf("Final error: %9.5e\n", rel_err);
-    printf("Time taken: %lld ms\n\n", timeTaken);
+    // printf("\nNumber of iterations: %d\n", num_iters_taken);
+    // printf("Final error: %9.5e\n", rel_err);
+    // printf("Time taken: %lld ms\n\n", timeTaken);
+    printf("%lld\n", timeTaken);
 
     get_exact_soln(nx, ny, xc, yc, Tex);
     output_soln(nx, ny, 0, xc, yc, T, Tex);
+
+    double l2err = get_l2err_norm(nx, ny, T, Tex);
+    // printf("%d %d %9.5e\n", nx, ny, l2err);
+    printf("%9.5e\n", l2err);
 
     // free memory
     // ----1D arrays ---
