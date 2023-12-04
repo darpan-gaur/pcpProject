@@ -5,10 +5,10 @@ do
     name=${file%.cpp}
     echo $name
     # compile the file
-    g++ $file -o $name
+    # g++ $file -o $name
     # # run the file
 
-    echo "nx, time" > $name.txt
+    echo "" > $name.txt
     for i in {1..5}
     do
         n=$((100*i))
@@ -37,7 +37,7 @@ do
         done
     done
 
-    # # remove the executable file
+    # remove the executable file
     rm $name
 done
 

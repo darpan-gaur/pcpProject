@@ -793,8 +793,8 @@ int main()
     // printf(" > Done solving for T ------------- \n");
 
     // printf("Final error: %9.5e\n", rel_err);
-    printf("%lld\n", timeTaken);
     printf("%d\n", num_iters_taken);
+    printf("%lld\n", timeTaken);
 
     get_exact_soln(nx, ny, xc, yc, Tex);
     // output_soln(nx, ny, 0, xc, yc, T, Tex);

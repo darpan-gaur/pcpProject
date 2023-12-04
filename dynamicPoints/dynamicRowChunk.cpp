@@ -652,7 +652,7 @@ int main()
     FILE *fp;
 
     // read inputs
-    fp = fopen("input.in", "r");
+    fp = fopen("input_par.in", "r");
     fscanf(fp, "%d %d\n", &nx, &ny);
     fscanf(fp, "%lf %lf\n", &xst, &xen);
     fscanf(fp, "%lf %lf\n", &yst, &yen);
@@ -775,8 +775,8 @@ int main()
     // printf(" > Done solving for T ------------- \n");
 
     // printf("Final error: %9.5e\n", rel_err);
-    printf("%lld\n", timeTaken);
     printf("%d\n", num_iters_taken);
+    printf("%lld\n", timeTaken);
 
     get_exact_soln(nx, ny, xc, yc, Tex);
     // output_soln(nx, ny, 0, xc, yc, T, Tex);

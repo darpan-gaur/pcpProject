@@ -410,37 +410,42 @@ void *calculate_new_values(void* thread_id) {
     int iter, ip , jp, i, j, batch_iter_count = 0;
     double T_gs, T_prev, thr_err, diff, tpad_max, tpnew_max, l2err, arrmax1, arrmax2, err_ref;
     int fun = nx/num_threads;
+    int chunkSize = nx/num_threads;
     for (iter = 0; iter < max_iter; iter++) {
         if (done_calculation) break;
         // Keep calculating error and max values when batch_iter_count == iteration_batch_size
         thr_err = 0.0;
         tpad_max = 0.0;
         tpnew_max = 0.0;
+        int id = thrId-1;
+        while (true) {
+            for (i=(id)*chunkSize;(i<nx) && (i<(id+1)*chunkSize);i++){
+                for (j=0;j<ny;j++) {
+                    ip = i+1;
+                    jp = j+1;
 
-        for (i=(thrId-1)*fun;(i<nx) && (i<(thrId)*fun);i++){
-            for (j=0;j<ny;j++) {
-                ip = i+1;
-                jp = j+1;
+                    T_prev = Tpnew[ip][jp];
+                    T_gs = ( b[i][j] + aE[i][j]*Tpnew[ip+1][jp] + aW[i][j]*Tpnew[ip-1][jp] + 
+                            aN[i][j]*Tpnew[ip][jp+1] + aS[i][j]*Tpnew[ip][jp-1] ) / aP[i][j];
 
-                T_prev = Tpnew[ip][jp];
-                T_gs = ( b[i][j] + aE[i][j]*Tpnew[ip+1][jp] + aW[i][j]*Tpnew[ip-1][jp] + 
-                        aN[i][j]*Tpnew[ip][jp+1] + aS[i][j]*Tpnew[ip][jp-1] ) / aP[i][j];
+                    if (done_calculation) break;
 
-                if (done_calculation) break;
+                    Tpnew[ip][jp] = (1.0 - relax_T) * T_prev + relax_T * T_gs;
+                    
+                    // Calculate error
+                    diff = Tpnew[ip][jp] - T_prev;
+                    thr_err += diff * diff;
 
-                Tpnew[ip][jp] = (1.0 - relax_T) * T_prev + relax_T * T_gs;
-                
-                // Calculate error
-                diff = Tpnew[ip][jp] - T_prev;
-                thr_err += diff * diff;
-
-                // Update max values
-                tpad_max = max(tpad_max, fabs(T_prev));
-                tpnew_max = max(tpnew_max, fabs(Tpnew[ip][jp]));
+                    // Update max values
+                    tpad_max = max(tpad_max, fabs(T_prev));
+                    tpnew_max = max(tpnew_max, fabs(Tpnew[ip][jp]));
+                }
             }
+            if (i>=nx) break;
+            id += num_threads;
         }
         // sleep of one nanosecond using this thread
-        this_thread::sleep_for(chrono::nanoseconds(1));
+        // this_thread::sleep_for(chrono::nanoseconds(1));
         if (done_calculation) break;
 
         thread_errs[iter][thrId-1] = thr_err;
@@ -472,33 +477,6 @@ void *calculate_new_values(void* thread_id) {
     pthread_exit(0);
 }
 
-// void *update_values(void* thread_id) {
-
-//     int iter, i, j, ip, jp;
-//     double arrmax1, arrmax2, err_ref, l2err;
-//     for (iter = 0; iter < max_iter; iter++) {
-        
-//         // pthread_barrier_wait(&bar_calc_2);
-
-//         // l2err = get_sum_1d_array(num_threads, thread_errs);
-//         // l2err = l2err / ((double)(nx * ny));
-//         // l2err = sqrt(l2err);
-
-//         // arrmax1 = get_max_1d_array(num_threads, thread_tpad_max);
-//         // arrmax2 = get_max_1d_array(num_threads, thread_tpnew_max);
-//         // err_ref = fmax(arrmax1, arrmax2);
-//         // err_ref = fmax(err_ref, 1.0e-6);
-//         // rel_err = l2err / err_ref;
-
-//         if (rel_err < tol) {
-//             // pthread_barrier_wait(&bar_upd);
-//             // break;
-//         }
-
-//         // pthread_barrier_wait(&bar_upd);
-//     }
-//     pthread_exit(0);
-// }
 
 long long solve_gssor_wave()
 {
@@ -595,7 +573,7 @@ int main()
 
     // printf("Inputs are: %d %d %lf %lf %lf %lf %d\n", nx, ny, xst, xen, yst, yen, num_threads);
 
-    max_iter = 100000;
+    max_iter = 1000000;
     tol = 1.0e-10;
     relax_T = 1.0;
 
@@ -731,17 +709,17 @@ int main()
     // ---
     // printf(" > Done solving for T ------------- \n");
 
-    // printf("\nNumber of iterations: %d\n", num_iters_taken);
-    // printf("Final error: %9.5e\n", rel_err);
-    // printf("Time taken: %lld ms\n\n", timeTaken);
-    printf("%lld\n", timeTaken);
+    printf("\nNumber of iterations: %d\n", num_iters_taken);
+    printf("Final error: %9.5e\n", rel_err);
+    printf("Time taken: %lld ms\n\n", timeTaken);
+    // printf("%lld\n", timeTaken);
 
     get_exact_soln(nx, ny, xc, yc, Tex);
     output_soln(nx, ny, 0, xc, yc, T, Tex);
 
     double l2err = get_l2err_norm(nx, ny, T, Tex);
-    // printf("%d %d %9.5e\n", nx, ny, l2err);
-    printf("%9.5e\n", l2err);
+    printf("%d %d %9.5e\n", nx, ny, l2err);
+    // printf("%9.5e\n", l2err);
 
     // free memory
     // ----1D arrays ---

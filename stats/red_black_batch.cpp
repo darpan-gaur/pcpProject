@@ -713,7 +713,7 @@ int main()
     // printf("\n > Done calculating fv coeffs ----- \n");
 
     // printf("\n > Solving for T ------------- \n");
-    max_iter = 100000;
+    max_iter = 1000000;
     tol = 1.0e-10;
     relax_T = 1.0;
     long long timeTaken = solve_gssor_wave();
@@ -725,7 +725,9 @@ int main()
     // printf("Final error: %9.5e\n", rel_err);
     // printf("Time taken: %lld ms\n\n", timeTaken);
 
-    printf("%lld\n%d\n", timeTaken, num_iters_taken);
+    // printf("%lld\n%d\n", timeTaken, num_iters_taken);
+    printf("%d\n", num_iters_taken);
+    printf("%lld\n", timeTaken);
 
     get_exact_soln(nx, ny, xc, yc, Tex);
     // output_soln(nx, ny, 0, xc, yc, T, Tex);

@@ -677,7 +677,7 @@ int main()
     // printf("\n > Done calculating fv coeffs ----- \n");
 
     // printf("\n > Solving for T ------------- \n");
-    max_iter = 100000;
+    max_iter = 1000000;
     tol = 1.0e-10;
     relax_T = 1.0;
     // solve_gssor(nx, ny, aP, aE, aW, aN, aS, b, T, Tpad, Tpnew, max_iter, tol, relax_T);
@@ -687,17 +687,17 @@ int main()
     // ---
     // printf(" > Done solving for T ------------- \n");
 
-    // printf("\nNumber of iterations: %d\n", num_iters_taken);
-    // printf("Final error: %9.5e\n", rel_err);
-    // printf("Time taken: %lld ms\n\n", timeTaken);
-    printf("%lld\n", timeTaken);
+    printf("\nNumber of iterations: %d\n", num_iters_taken);
+    printf("Final error: %9.5e\n", rel_err);
+    printf("Time taken: %lld ms\n\n", timeTaken);
+    // printf("%lld\n", timeTaken);
 
     get_exact_soln(nx, ny, xc, yc, Tex);
     output_soln(nx, ny, 0, xc, yc, T, Tex);
 
     double l2err = get_l2err_norm(nx, ny, T, Tex);
-    // printf("%d %d %9.5e\n", nx, ny, l2err);
-    printf("%9.5e\n", l2err);
+    printf("%d %d %9.5e\n", nx, ny, l2err);
+    // printf("%9.5e\n", l2err);
 
     // free memory
     // ----1D arrays ---
